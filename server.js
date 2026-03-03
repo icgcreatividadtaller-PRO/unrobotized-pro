@@ -8,7 +8,6 @@ const __dirname = path.dirname(__filename);
 
 const app = express();
 app.use(express.json());
-// Cambiamos esto para que busque en la raíz, no en 'public'
 app.use(express.static('.')); 
 
 const openai = new OpenAI({
@@ -27,12 +26,10 @@ app.post('/api/optimize', async (req, res) => {
     });
     res.json({ optimized: completion.choices[0].message.content });
   } catch (error) {
-    console.error(error);
+    console.error("Error en OpenAI:", error);
     res.status(500).json({ error: "Error al conectar con la IA." });
   }
 });
 
-const PORT = process.env.PORT || 3000;
-app.listen(PORT, () => {
-  console.log(`Servidor listo`);
-});
+// Esta línea es la clave para que funcione en Vercel
+export default app;
