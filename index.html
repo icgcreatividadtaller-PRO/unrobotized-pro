@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnRobotized Pro | Precision Action v3.4</title>
+    <title>UnRobotized Pro | Precision Action v3.5</title>
     
     <link rel="apple-touch-icon" href="/icon.png">
     <link rel="icon" type="image/png" href="/icon.png">
@@ -11,91 +11,31 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
 
     <script src="https://cdn.tailwindcss.com"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&family=Orbitron:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;800&display=swap" rel="stylesheet">
     
     <style>
         body { font-family: 'Inter', sans-serif; background: #020617; color: #f8fafc; margin: 0; min-height: 100vh; overflow-x: hidden; }
+        .glass-panel { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 1); }
+        .ps-button { border-top: 3px solid rgba(255, 255, 255, 0.25); border-left: 3px solid rgba(255, 255, 255, 0.25); border-right: 3px solid rgba(0, 0, 0, 0.5); border-bottom: 3px solid rgba(0, 0, 0, 0.5); box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5); transition: all 0.2s ease; }
+        .ps-button:active { border-top: 3px solid rgba(0, 0, 0, 0.5); border-left: 3px solid rgba(0, 0, 0, 0.5); transform: scale(0.98); }
+        .tone-btn.active { background-color: #0ea5e9 !important; color: #020617 !important; box-shadow: 0 0 30px rgba(14, 165, 233, 0.5); }
+        .neon-box { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(14, 165, 233, 0.4); box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); border-radius: 1.5rem; }
+        .halftone-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background-image: radial-gradient(circle, #0ea5e9 1.5px, transparent 1.5px); background-size: 14px 14px; opacity: 0.35; }
         
-        .glass-panel { 
-            background: rgba(15, 23, 42, 0.9);
-            backdrop-filter: blur(25px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-            box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 1);
-            position: relative;
-            z-index: 20;
-        }
-
-        /* --- EFECTO PHOTOSHOP: BEVEL & EMBOSS --- */
-        .ps-button {
-            border-top: 3px solid rgba(255, 255, 255, 0.25);
-            border-left: 3px solid rgba(255, 255, 255, 0.25);
-            border-right: 3px solid rgba(0, 0, 0, 0.5);
-            border-bottom: 3px solid rgba(0, 0, 0, 0.5);
-            box-shadow: 0 8px 15px rgba(0, 0, 0, 0.5);
-            transition: all 0.2s ease;
-        }
-        .ps-button:active {
-            border-top: 3px solid rgba(0, 0, 0, 0.5);
-            border-left: 3px solid rgba(0, 0, 0, 0.5);
-            border-right: 3px solid rgba(255, 255, 255, 0.1);
-            border-bottom: 3px solid rgba(255, 255, 255, 0.1);
-            transform: scale(0.98);
-        }
-        .tone-btn.active {
-            background-color: #0ea5e9 !important;
-            color: #020617 !important;
-            box-shadow: 0 0 30px rgba(14, 165, 233, 0.5);
-        }
-
-        /* --- NEÓN REFORZADO --- */
-        .neon-box {
-            background: rgba(2, 6, 23, 0.8);
-            border: 1px solid rgba(14, 165, 233, 0.4);
-            box-shadow: 0 0 30px rgba(14, 165, 233, 0.2);
-            border-radius: 1.5rem;
-        }
-
-        /* --- HALFTONE DINÁMICO --- */
-        .halftone-bg {
-            position: fixed;
-            top: 0; left: 0; width: 100vw; height: 100vh;
-            z-index: 1;
-            background-image: radial-gradient(circle, #0ea5e9 1.5px, transparent 1.5px);
-            background-size: 14px 14px;
-            mask-image: radial-gradient(circle at bottom right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%);
-            -webkit-mask-image: radial-gradient(circle at bottom right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%);
-            opacity: 0.35;
-        }
-
-        /* --- ANIMACIÓN SATÉLITE --- */
-        .satellite-orbit {
-            width: 50px; height: 50px;
-            border: 1px dashed rgba(14, 165, 233, 0.5);
-            border-radius: 50%;
-            position: relative;
-            animation: spin 3s linear infinite;
-            display: none;
-            margin: 0 auto 15px;
-        }
-        .satellite-body {
-            width: 10px; height: 10px;
-            background: #0ea5e9;
-            border-radius: 50%;
-            position: absolute;
-            top: -5px; left: 50%;
-            box-shadow: 0 0 15px #0ea5e9;
-        }
+        .satellite-orbit { width: 50px; height: 50px; border: 1px dashed rgba(14, 165, 233, 0.5); border-radius: 50%; position: relative; animation: spin 3s linear infinite; display: none; margin: 0 auto 15px; }
+        .satellite-body { width: 10px; height: 10px; background: #0ea5e9; border-radius: 50%; position: absolute; top: -5px; left: 50%; box-shadow: 0 0 15px #0ea5e9; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
-
+        
         textarea { text-align: center; resize: none; }
-        ::placeholder { color: #475569 !important; }
+        .history-item { font-size: 0.75rem; border-bottom: 1px solid rgba(255,255,255,0.05); padding: 8px 0; cursor: pointer; transition: color 0.2s; }
+        .history-item:hover { color: #0ea5e9; }
     </style>
 </head>
-<body class="flex items-center justify-center p-2 md:p-4">
+<body class="flex items-center justify-center p-2 md:p-4" onload="renderHistory()">
 
     <div class="halftone-bg"></div>
 
-    <div class="max-w-7xl w-full glass-panel rounded-[3rem] p-6 md:p-10">
+    <div class="max-w-7xl w-full glass-panel rounded-[3rem] p-6 md:p-10 z-20">
         
         <header class="text-center mb-8">
             <h1 class="text-4xl md:text-5xl font-extrabold text-white tracking-tighter leading-tight">
@@ -112,5 +52,109 @@
                 <div class="space-y-4">
                     <label class="block text-[11px] font-black text-sky-400 uppercase tracking-[0.4em] text-center">Táctica de Apertura</label>
                     <div class="grid grid-cols-3 gap-3">
-                        <button id="t-dir" onclick="setTone('directo')" class="tone-btn ps-button active py-4 rounded-xl text-xs md:text-sm font-black uppercase flex flex-col items-center gap-2">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                        <button id="t-dir" onclick="setTone('directo')" class="tone-btn ps-button active py-4 rounded-xl text-xs md:text-sm font-black uppercase">Directo</button>
+                        <button id="t-cur" onclick="setTone('curioso')" class="tone-btn ps-button py-4 rounded-xl text-xs md:text-sm font-black uppercase text-slate-100">Curioso</button>
+                        <button id="t-wha" onclick="setTone('whatsapp')" class="tone-btn ps-button py-4 rounded-xl text-xs md:text-sm font-black uppercase text-slate-100">WhatsApp</button>
+                    </div>
+                </div>
+
+                <div class="neon-box p-4">
+                    <label class="block text-sm font-black text-slate-100 uppercase tracking-[0.2em] text-center mb-4">Entrada de Texto:</label>
+                    <textarea id="inputMsg" rows="5" class="w-full bg-transparent p-2 text-white font-medium outline-none text-base" placeholder="Pega tu mensaje aquí..."></textarea>
+                </div>
+
+                <button id="mainBtn" onclick="optimizar()" class="w-full ps-button bg-gradient-to-r from-indigo-600 to-sky-500 text-white py-6 rounded-2xl font-black text-base uppercase tracking-[0.2em]">Optimizar Mensaje ✨</button>
+            </div>
+
+            <div class="flex flex-col gap-6">
+                <div id="resPanel" class="neon-box p-8 flex flex-col border border-white/10 h-[300px] relative">
+                    <div class="text-center border-b border-white/20 pb-4 mb-4">
+                        <span class="text-sm font-black text-sky-400 uppercase tracking-[0.4em]">Misil Generado</span>
+                    </div>
+                    <div class="flex-grow flex flex-col items-center justify-center overflow-y-auto">
+                        <div id="satellite" class="satellite-orbit"><div class="satellite-body"></div></div>
+                        <div id="resArea" class="p-2 text-slate-300 italic text-base text-center w-full">Listo para calibrar...</div>
+                    </div>
+                    <button id="copyBtn" onclick="copiar()" class="mt-4 ps-button bg-slate-100 text-slate-900 py-3 rounded-xl font-black text-[10px] uppercase tracking-widest">Copiar Texto</button>
+                </div>
+
+                <div class="neon-box p-6 border border-white/5">
+                    <span class="text-[10px] font-black text-slate-500 uppercase tracking-[0.3em] mb-4 block">Misiones Recientes</span>
+                    <div id="historyList" class="space-y-1">
+                        </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        let currentTone = 'directo';
+
+        function setTone(t) {
+            currentTone = t;
+            ['dir', 'cur', 'wha'].forEach(id => {
+                const btn = document.getElementById('t-' + id);
+                btn.classList.remove('active');
+                btn.classList.add('text-slate-100');
+            });
+            document.getElementById('t-' + t.substring(0,3)).classList.add('active');
+        }
+
+        async function optimizar() {
+            const msg = document.getElementById('inputMsg').value;
+            const resArea = document.getElementById('resArea');
+            const sat = document.getElementById('satellite');
+            if(!msg) return alert("Pega un mensaje, socio.");
+
+            sat.style.display = "block";
+            resArea.innerText = "Sincronizando órbita...";
+
+            try {
+                const response = await fetch('/api/optimize', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ message: msg, tone: currentTone })
+                });
+                const data = await response.json();
+                const result = data.optimized;
+                
+                resArea.style.fontStyle = "normal";
+                resArea.innerText = result;
+                
+                saveToHistory(currentTone, result);
+            } catch (e) {
+                resArea.innerText = "Error de conexión.";
+            } finally {
+                sat.style.display = "none";
+            }
+        }
+
+        function saveToHistory(tone, text) {
+            let history = JSON.parse(localStorage.getItem('ur_history') || '[]');
+            history.unshift({ tone, text: text.substring(0, 50) + '...' });
+            history = history.slice(0, 5);
+            localStorage.setItem('ur_history', JSON.stringify(history));
+            renderHistory();
+        }
+
+        function renderHistory() {
+            const history = JSON.parse(localStorage.getItem('ur_history') || '[]');
+            const list = document.getElementById('historyList');
+            list.innerHTML = history.map(item => `
+                <div class="history-item">
+                    <span class="text-sky-500 font-bold">[${item.tone.toUpperCase()}]</span> ${item.text}
+                </div>
+            `).join('');
+        }
+
+        function copiar() {
+            const texto = document.getElementById('resArea').innerText;
+            if(texto.includes("Listo")) return;
+            navigator.clipboard.writeText(texto);
+            const btn = document.getElementById('copyBtn');
+            btn.innerText = "¡COPIADO!";
+            setTimeout(() => btn.innerText = "Copiar Texto", 2000);
+        }
+    </script>
+</body>
+</html>
