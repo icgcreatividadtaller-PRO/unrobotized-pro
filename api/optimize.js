@@ -1,41 +1,58 @@
-import express from 'express';
+import { Redis } from 'ioredis';
 import OpenAI from 'openai';
 
-const app = express();
-app.use(express.json());
+const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
 
-const openai = new OpenAI({
-  apiKey: process.env.OPENAI_API_KEY,
-});
+// Conexión usando la URL única que tienes en Vercel
+const redis = new Redis(process.env.REDIS_URL);
 
-const prompts = {
-  // Ajuste: Más corto y agresivo (Directo al beneficio)
-  directo: "Eres un cerrador de ventas de alto nivel. Escribe un mensaje extremadamente corto, directo y agresivo. Cero rellenos, cero saludos vacíos. Ve directo a la yugular con el beneficio o la propuesta. Máximo 250 caracteres.",
-  
-  curioso: "Eres un experto en psicología persuasiva. Genera curiosidad absoluta. Haz una observación aguda sobre su negocio y termina con una pregunta que los obligue a responder.",
-  
-  // Ajuste: Emojis estratégicos y tono casual
-  whatsapp: "Escribe como un humano real en un chat de WhatsApp. Usa un tono muy casual, algunas minúsculas al inicio y añade 1 o 2 emojis estratégicos (🚀, 💡, 🎯) para generar cercanía. Que parezca escrito rápido desde un móvil."
-};
+export default async function handler(req, res) {
+  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-app.post('/api/optimize', async (req, res) => {
+  // 1. Detectar la IP del usuario
+  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
+  const limit = 3;
+
   try {
+    // 2. Consultar el contador en Redis
+    const count = await redis.get(`usage:${ip}`) || 0;
+    const currentCount = parseInt(count);
+
+    // 3. Bloqueo si supera el límite de 3
+    if (currentCount >= limit) {
+      return res.status(403).json({ 
+        error: "LIMIT_REACHED", 
+        message: "Acceso de cortesía completado." 
+      });
+    }
+
     const { message, tone } = req.body;
-    const selectedPrompt = prompts[tone] || prompts.directo;
+    
+    // Prompts tácticos de UnRobotized PRO
+    const prompts = {
+      directo: "Eres un cerrador de ventas. Mensaje corto, agresivo, sin rellenos. Máximo 200 caracteres.",
+      curioso: "Psicología persuasiva. Genera curiosidad extrema con una pregunta final.",
+      whatsapp: "Socio en chat casual. Usa minúsculas y 1 o 2 emojis (🚀, 🎯)."
+    };
 
     const completion = await openai.chat.completions.create({
       model: "gpt-4o-mini",
       messages: [
-        { role: "system", content: selectedPrompt },
+        { role: "system", content: prompts[tone] || prompts.directo },
         { role: "user", content: `Humaniza este mensaje: "${message}"` }
       ],
       temperature: 0.8,
     });
 
-    res.json({ optimized: completion.choices[0].message.content });
-  } catch (error) {
-    res.status(500).json({ error: "Error de sistema." });
-  }
-});
+    const result = completion.choices[0].message.content;
 
-export default app;
+    // 4. Aumentar el contador y ponerle fecha de expiración (24 horas)
+    await redis.set(`usage:${ip}`, currentCount + 1, 'EX', 86400);
+
+    return res.json({ optimized: result });
+
+  } catch (error) {
+    console.error("Error táctico:", error);
+    return res.status(500).json({ error: "Error de sincronización con el satélite." });
+  }
+}
