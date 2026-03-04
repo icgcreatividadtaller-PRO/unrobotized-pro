@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnRobotized Pro | Refined v3.8</title>
+    <title>UnRobotized Pro | IP-Shield v3.9</title>
     
     <link rel="apple-touch-icon" href="/icon.png">
     <link rel="icon" type="image/png" href="/icon.png">
@@ -16,11 +16,12 @@
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #020617; color: #f8fafc; margin: 0; min-height: 100vh; overflow-x: hidden; display: flex; justify-content: center; align-items: center; padding: 2rem 1rem; }
         
+        /* Halftone Dinámico (Fondo Táctico) */
         .halftone-bg { position: fixed; top: 0; left: 0; width: 100vw; height: 100vh; z-index: 1; background-image: radial-gradient(circle, #0ea5e9 1.5px, transparent 1.5px); background-size: 14px 14px; mask-image: radial-gradient(circle at bottom right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%); -webkit-mask-image: radial-gradient(circle at bottom right, rgba(0,0,0,1) 0%, rgba(0,0,0,0) 70%); opacity: 0.25; }
 
         .glass-panel { background: rgba(15, 23, 42, 0.9); backdrop-filter: blur(25px); border: 1px solid rgba(255, 255, 255, 0.1); box-shadow: 0 40px 100px -20px rgba(0, 0, 0, 1); position: relative; z-index: 20; display: flex; flex-direction: column; }
 
-        /* AJUSTE 5: Tipografía de botones a 10pt (approx 13px) */
+        /* Botones Bevel & Emboss (Tamaño 10pt/13px) */
         .ps-button { 
             border-top: 3px solid rgba(255, 255, 255, 0.25); border-left: 3px solid rgba(255, 255, 255, 0.25); 
             border-right: 3px solid rgba(0, 0, 0, 0.5); border-bottom: 3px solid rgba(0, 0, 0, 0.5); 
@@ -31,32 +32,33 @@
         .ps-button:active { border-top: 3px solid rgba(0, 0, 0, 0.5); border-left: 3px solid rgba(0, 0, 0, 0.5); transform: scale(0.98); }
         .ps-button-active { background-color: #0ea5e9 !important; color: #020617 !important; box-shadow: 0 0 30px rgba(14, 165, 233, 0.5); }
         
-        .icon-svg { width: 1.2rem; height: 1.2rem; stroke-width: 2.5; }
+        .icon-svg { width: 1.25rem; height: 1.25rem; stroke-width: 2.5; }
 
+        /* Neon Boxes */
         .neon-box { background: rgba(2, 6, 23, 0.8); border: 1px solid rgba(14, 165, 233, 0.4); box-shadow: 0 0 30px rgba(14, 165, 233, 0.2); border-radius: 1.5rem; overflow: hidden; display: flex; flex-direction: column; position: relative; }
-        
-        /* AJUSTE 5: Label Misil Generado a 10pt */
         .box-title { text-align: center; font-size: 13px; font-weight: 800; text-transform: uppercase; letter-spacing: 0.2em; color: #0ea5e9; padding: 1.5rem 1.5rem 1rem 1.5rem; border-bottom: 1px solid rgba(255, 255, 255, 0.1); }
 
-        #misiones_list { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 1.5rem; height: 130px; overflow-y: auto; }
-        .mission-item { font-size: 12px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; cursor: pointer; }
+        /* Misiones Recientes (3 Visibles + Scroll) */
+        #misiones_list { display: flex; flex-direction: column; gap: 0.75rem; padding: 1rem 1.5rem; height: 135px; overflow-y: auto; }
+        .mission-item { font-size: 12px; color: #94a3b8; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 5px; }
 
-        /* SATÉLITE MEJORADO */
-        .satellite-orbit { width: 80px; height: 80px; border: 2px dashed rgba(14, 165, 233, 0.4); border-radius: 50%; position: relative; animation: spin 6s linear infinite; display: none; margin: 10px auto 20px; }
-        .satellite-body { width: 16px; height: 16px; background: #0ea5e9; border-radius: 50%; position: absolute; top: -8px; left: 50%; box-shadow: 0 0 20px #0ea5e9; }
+        /* SATÉLITE GIGANTE (Protagonista) */
+        .satellite-orbit { width: 85px; height: 85px; border: 2px dashed rgba(14, 165, 233, 0.4); border-radius: 50%; position: relative; animation: spin 6s linear infinite; display: none; margin: 15px auto; }
+        .satellite-body { width: 18px; height: 18px; background: #0ea5e9; border-radius: 50%; position: absolute; top: -9px; left: 50%; box-shadow: 0 0 25px #0ea5e9; }
         @keyframes spin { 100% { transform: rotate(360deg); } }
 
-        /* AJUSTE 3: Paywall amigable */
-        #paywall { display: none; position: absolute; inset: 0; background: rgba(2, 6, 23, 0.96); z-index: 50; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; border-radius: 1.5rem; }
+        /* Capa de Pago Amigable (Nivel 2) */
+        #paywall { display: none; position: absolute; inset: 0; background: rgba(2, 6, 23, 0.97); z-index: 50; flex-direction: column; align-items: center; justify-content: center; text-align: center; padding: 2rem; border-radius: 1.5rem; }
 
         textarea { text-align: center; resize: none; overflow-y: auto; }
         ::-webkit-scrollbar { width: 6px; }
         ::-webkit-scrollbar-thumb { background: #0ea5e9; border-radius: 10px; }
 
+        /* Footer Laguna Labs (Visible) */
         .tactical-footer { margin-top: 2rem; text-align: center; color: #f1f5f9; font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.8em; font-weight: 600; }
     </style>
 </head>
-<body onload="checkCredits()">
+<body>
 
     <div class="halftone-bg"></div>
 
@@ -97,14 +99,14 @@
                     
                     <div id="paywall">
                         <span class="text-sky-400 font-extrabold text-xl mb-2 uppercase tracking-tighter">Acceso de Cortesía Completado</span>
-                        <p class="text-slate-300 text-sm mb-8 px-6 leading-relaxed">Has agotado tus pruebas gratuitas. <br> Actualiza a la versión completa para seguir enviando misiles.</p>
+                        <p class="text-slate-300 text-sm mb-8 px-6 leading-relaxed">Has agotado tus pruebas gratuitas desde esta conexión.<br> Actualiza a la versión PRO para continuar.</p>
                         <a href="TU_LINK_DE_PAGO" target="_blank" class="ps-button bg-sky-500 text-white py-4 px-10 rounded-xl font-extrabold uppercase tracking-widest scale-105">
                             Obtener Pase PRO ⚡
                         </a>
                     </div>
                 </div>
 
-                <button id="mainBtn" onclick="optimizar()" class="w-full ps-button bg-gradient-to-r from-indigo-600 to-sky-500 text-white py-6 rounded-2xl font-black text-base uppercase tracking-widest flex items-center justify-center gap-2">
+                <button id="mainBtn" onclick="optimizar()" class="w-full ps-button bg-gradient-to-r from-indigo-600 to-sky-500 text-white py-6 rounded-2xl font-black text-base uppercase tracking-widest">
                     Optimizar Mensaje
                 </button>
             </div>
@@ -133,18 +135,9 @@
 
     <script>
         let currentTone = 'directo';
-        const MAX_FREE = 3;
 
-        function checkCredits() {
-            let used = localStorage.getItem('ur_used') || 0;
-            if (used >= MAX_FREE) {
-                document.getElementById('paywall').style.display = 'flex';
-                document.getElementById('inputMsg').disabled = true;
-                document.getElementById('mainBtn').disabled = true;
-                document.getElementById('mainBtn').style.opacity = '0.3';
-            }
-            renderHistory();
-        }
+        // Al cargar, solo renderizamos lo visual. El control real es la IP en el servidor.
+        window.onload = () => { renderHistory(); };
 
         function setTone(t) {
             currentTone = t;
@@ -157,12 +150,14 @@
             const resArea = document.getElementById('resArea');
             const sat = document.getElementById('satellite');
             const btn = document.getElementById('mainBtn');
+            const paywall = document.getElementById('paywall');
 
-            if(!msg) return alert("Socio, pega algo aburrido.");
+            if(!msg) return alert("Socio, el sistema necesita datos de entrada.");
 
             btn.disabled = true;
             sat.style.display = "block";
-            resArea.innerText = "Sincronizando órbita...";
+            resArea.innerText = "Sincronizando órbita neural...";
+            resArea.style.fontStyle = "italic";
             
             try {
                 const response = await fetch('/api/optimize', {
@@ -170,31 +165,39 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ message: msg, tone: currentTone })
                 });
+
+                // Si el servidor detecta el límite por IP (Nivel 2)
+                if (response.status === 403) {
+                    paywall.style.display = 'flex';
+                    resArea.innerText = "Acceso limitado por IP.";
+                    return;
+                }
+
                 const data = await response.json();
-                
                 resArea.style.fontStyle = "normal";
                 resArea.innerText = data.optimized;
 
-                let used = parseInt(localStorage.getItem('ur_used') || 0) + 1;
-                localStorage.setItem('ur_used', used);
-                
-                let history = JSON.parse(localStorage.getItem('ur_history') || '[]');
-                history.unshift({ tone: currentTone, text: data.optimized });
-                // AJUSTE 4: El sistema guarda solo lo necesario para el render
-                localStorage.setItem('ur_history', JSON.stringify(history.slice(0, 10)));
+                // Guardar en el historial visual del usuario
+                saveToLocalHistory(currentTone, data.optimized);
 
-                checkCredits();
-            } catch (e) { resArea.innerText = "Error de enlace."; }
-            finally {
+            } catch (e) {
+                resArea.innerText = "Error de enlace táctico.";
+            } finally {
                 sat.style.display = "none";
                 btn.disabled = false;
             }
         }
 
+        function saveToLocalHistory(tone, text) {
+            let history = JSON.parse(localStorage.getItem('ur_history') || '[]');
+            history.unshift({ tone, text });
+            localStorage.setItem('ur_history', JSON.stringify(history.slice(0, 10)));
+            renderHistory();
+        }
+
         function renderHistory() {
             const history = JSON.parse(localStorage.getItem('ur_history') || '[]');
             const list = document.getElementById('misiones_list');
-            // AJUSTE 4: En el render limitamos la visualización inicial pero permitimos scroll
             list.innerHTML = history.slice(0, 3).map(m => `
                 <div class="mission-item">
                     <span class="text-sky-500 font-bold">[${m.tone.toUpperCase()}]</span> ${m.text.substring(0, 45)}...
@@ -204,7 +207,7 @@
 
         function copiar() {
             const txt = document.getElementById('resArea').innerText;
-            if(txt.includes("calibrar")) return;
+            if(txt.includes("Listo")) return;
             navigator.clipboard.writeText(txt);
             const btn = document.getElementById('copyBtn');
             btn.innerText = "¡COPIADO!";
