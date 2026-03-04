@@ -4,48 +4,37 @@ import OpenAI from 'openai';
 const app = express();
 app.use(express.json());
 
-// Inicializamos OpenAI con tu llave segura de la bóveda (Vercel Env)
 const openai = new OpenAI({
   apiKey: process.env.OPENAI_API_KEY,
 });
 
-// Definición de los "Cerebros" tácticos
 const prompts = {
-  directo: "Eres un estratega de ventas B2B. Escribe un mensaje directo, sin rellenos ni saludos genéricos. Empieza con una observación de valor o un beneficio claro. Máximo 2 párrafos cortos.",
-  curioso: "Eres un experto en psicología persuasiva. Tu objetivo es generar curiosidad genuina. Haz una observación aguda sobre su industria y termina con una pregunta abierta que sea imposible de ignorar.",
-  whatsapp: "Escribe como un humano real en un chat casual. Usa un tono relajado, algunas minúsculas al inicio, evita párrafos largos y usa máximo un emoji. Que parezca un mensaje escrito desde el móvil por un socio."
+  // Ajuste: Más corto y agresivo (Directo al beneficio)
+  directo: "Eres un cerrador de ventas de alto nivel. Escribe un mensaje extremadamente corto, directo y agresivo. Cero rellenos, cero saludos vacíos. Ve directo a la yugular con el beneficio o la propuesta. Máximo 250 caracteres.",
+  
+  curioso: "Eres un experto en psicología persuasiva. Genera curiosidad absoluta. Haz una observación aguda sobre su negocio y termina con una pregunta que los obligue a responder.",
+  
+  // Ajuste: Emojis estratégicos y tono casual
+  whatsapp: "Escribe como un humano real en un chat de WhatsApp. Usa un tono muy casual, algunas minúsculas al inicio y añade 1 o 2 emojis estratégicos (🚀, 💡, 🎯) para generar cercanía. Que parezca escrito rápido desde un móvil."
 };
 
 app.post('/api/optimize', async (req, res) => {
   try {
     const { message, tone } = req.body;
-
-    // Si el tono no existe o falla, usamos 'directo' por defecto
-    const selectedSystemPrompt = prompts[tone] || prompts.directo;
+    const selectedPrompt = prompts[tone] || prompts.directo;
 
     const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini", // Usamos el modelo más rápido y eficiente para 2026
+      model: "gpt-4o-mini",
       messages: [
-        { 
-          role: "system", 
-          content: selectedSystemPrompt 
-        },
-        { 
-          role: "user", 
-          content: `Humaniza el siguiente mensaje, manteniendo la esencia pero mejorando la conversión: "${message}"` 
-        }
+        { role: "system", content: selectedPrompt },
+        { role: "user", content: `Humaniza este mensaje: "${message}"` }
       ],
-      temperature: 0.7, // Nivel de creatividad equilibrado
+      temperature: 0.8,
     });
 
-    const optimizedText = completion.choices[0].message.content;
-    
-    // Enviamos el misil de vuelta a tu interfaz neón
-    res.json({ optimized: optimizedText });
-
+    res.json({ optimized: completion.choices[0].message.content });
   } catch (error) {
-    console.error("Error en la bóveda OpenAI:", error);
-    res.status(500).json({ error: "SISTEMA: Error al procesar el Misil de Ventas." });
+    res.status(500).json({ error: "Error de sistema." });
   }
 });
 
