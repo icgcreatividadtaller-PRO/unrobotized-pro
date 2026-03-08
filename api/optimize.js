@@ -1,15 +1,18 @@
 export default async function handler(req, res) {
-    if (req.method !== 'POST') return res.status(405).json({ message: 'Error' });
+    // Solo aceptamos peticiones POST
+    if (req.method !== 'POST') return res.status(405).json({ message: 'Error de método' });
+
     const { text, mode } = req.body;
     const API_KEY = process.env.OPENAI_API_KEY;
 
-    if (!API_KEY) return res.status(500).json({ error: "Falta la llave de OpenAI en Vercel." });
+    // Validación de seguridad
+    if (!API_KEY) return res.status(500).json({ error: "Falta la llave OPENAI_API_KEY en Vercel." });
+    if (!text) return res.status(400).json({ error: "No enviaste texto para optimizar." });
 
-    // Instrucciones diseñadas para máxima calidez y motivación
     const instructions = {
-        directo: "Actúa como un mentor empático. Reescribe este mensaje para que sea cálido, profesional y humano. Quita cualquier rastro de agresividad o frialdad, pero mantén la autoridad.",
-        curioso: "Transforma esto en una pregunta intrigante que despierte curiosidad genuina y conexión emocional. Que no parezca un robot vendiendo.",
-        whatsapp: "Usa un tono de chat muy cercano, relajado, con minúsculas casuales y sin puntos finales. Que parezca un mensaje de un amigo que quiere ayudar."
+        directo: "Actúa como un mentor empático. Reescribe este mensaje para que sea cálido, profesional y humano. Elimina la frialdad.",
+        curioso: "Transforma esto en una pregunta intrigante que despierte curiosidad genuina. Que no parezca un robot.",
+        whatsapp: "Usa un tono de chat cercano, relajado, con minúsculas casuales y sin puntos finales."
     };
 
     try {
@@ -25,7 +28,7 @@ export default async function handler(req, res) {
                     { role: "system", content: instructions[mode] || instructions.directo },
                     { role: "user", content: text }
                 ],
-                temperature: 0.8 // Un poco de "creatividad" para que suene más humano
+                temperature: 0.8
             })
         });
 
@@ -37,9 +40,12 @@ export default async function handler(req, res) {
             });
         }
 
-        return res.status(500).json({ error: "OpenAI no pudo procesar el misil.", details: data });
+        return res.status(500).json({ 
+            error: "OpenAI rechazó la misión.", 
+            details: data.error ? data.error.message : "Error desconocido" 
+        });
 
     } catch (e) {
-        return res.status(500).json({ error: "Fallo de conexión con la central." });
+        return res.status(500).json({ error: "Error de red: " + e.message });
     }
 }
