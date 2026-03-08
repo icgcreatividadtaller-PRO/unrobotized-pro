@@ -11,23 +11,13 @@
         .btn-mode { background: #1e293b; border: 1px solid #334155; transition: 0.3s; }
         .btn-mode.active { background: #38bdf8; color: #000; border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
         
-        /* ANIMACIÓN DEL SATÉLITE */
+        /* EL SATÉLITE LAGUNA LABS */
         @keyframes orbit {
-            0% { transform: rotate(0deg) translateX(50px) rotate(0deg); }
-            100% { transform: rotate(360deg) translateX(50px) rotate(-360deg); }
+            0% { transform: rotate(0deg) translateX(45px) rotate(0deg); }
+            100% { transform: rotate(360deg) translateX(45px) rotate(-360deg); }
         }
-        .satellite {
-            width: 12px; height: 12px; background: #38bdf8; border-radius: 50%;
-            position: absolute; top: 50%; left: 50%;
-            box-shadow: 0 0 15px #38bdf8;
-            animation: orbit 2s linear infinite;
-            display: none;
-        }
-        .neural-center {
-            width: 20px; height: 20px; background: rgba(56, 189, 248, 0.2);
-            border-radius: 50%; position: absolute; top: 50%; left: 50%;
-            transform: translate(-50%, -50%); display: none;
-        }
+        .satellite-loader { display: none; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 15px #38bdf8; animation: orbit 1.5s linear infinite; }
+        .neural-center { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25px; height: 25px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%; }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-10">
@@ -49,15 +39,15 @@
                 <div class="flex gap-3">
                     <button onclick="setMode('directo')" id="btn-directo" class="btn-mode active flex-1 py-4 rounded-xl flex flex-col items-center">
                         <span class="text-xl">↑</span>
-                        <span class="text-[11px] font-black uppercase tracking-widest">Directo</span>
+                        <span class="text-[10px] font-black uppercase">Directo</span>
                     </button>
                     <button onclick="setMode('curioso')" id="btn-curioso" class="btn-mode flex-1 py-4 rounded-xl flex flex-col items-center">
                         <span class="text-xl">?</span>
-                        <span class="text-[11px] font-black uppercase tracking-widest">Curioso</span>
+                        <span class="text-[10px] font-black uppercase">Curioso</span>
                     </button>
                     <button onclick="setMode('whatsapp')" id="btn-whatsapp" class="btn-mode flex-1 py-4 rounded-xl flex flex-col items-center">
                         <span class="text-xl">💬</span>
-                        <span class="text-[11px] font-black uppercase tracking-widest">WhatsApp</span>
+                        <span class="text-[10px] font-black uppercase">WhatsApp</span>
                     </button>
                 </div>
 
@@ -75,10 +65,8 @@
                 <div class="bg-slate-900/90 rounded-2xl border border-sky-500/30 p-6 min-h-[300px] md:min-h-[380px] flex flex-col relative overflow-hidden">
                     <label class="text-[10px] uppercase tracking-widest text-sky-400 font-black mb-4 block">Misil Generado</label>
                     
-                    <div id="neural-loader" class="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div class="neural-center" id="sat-center"></div>
-                        <div class="satellite" id="sat-orb"></div>
-                    </div>
+                    <div class="neural-center" id="sat-center"></div>
+                    <div class="satellite-loader" id="sat-orb"></div>
 
                     <div class="flex-1 flex items-start justify-center text-center italic text-slate-100 overflow-y-auto">
                         <p id="outputText" class="text-base md:text-lg leading-relaxed py-4 px-2">Listo para calibrar...</p>
@@ -88,7 +76,7 @@
 
                 <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 opacity-70">
                     <div class="flex justify-between items-center">
-                        <label class="text-[9px] uppercase tracking-widest text-slate-400 font-bold">Registro de Vuelo</label>
+                        <label class="text-[9px] uppercase tracking-widest text-slate-400 font-bold italic">Misiones Recientes</label>
                         <span id="mission-count" class="text-[9px] font-black text-sky-400">3/3 DISPONIBLES</span>
                     </div>
                 </div>
@@ -115,7 +103,7 @@
             const text = document.getElementById('inputText').value;
             if(!text) return;
 
-            // MOSTRAR SATÉLITE
+            // ACTIVAR SATÉLITE
             document.getElementById('sat-center').style.display = 'block';
             document.getElementById('sat-orb').style.display = 'block';
             document.getElementById('outputText').innerText = "CALIBRANDO MISIL...";
@@ -123,12 +111,12 @@
             try {
                 const res = await fetch('/api/optimize', {
                     method: 'POST',
-                    body: JSON.stringify({ text, mode: currentMode }),
+                    body: JSON.stringify({ text: text, mode: currentMode }),
                     headers: {'Content-Type': 'application/json'}
                 });
                 const result = await res.json();
 
-                // OCULTAR SATÉLITE
+                // APAGAR SATÉLITE
                 document.getElementById('sat-center').style.display = 'none';
                 document.getElementById('sat-orb').style.display = 'none';
 
@@ -146,7 +134,6 @@
                 document.getElementById('outputText').innerText = "ERROR DE CONEXIÓN.";
             }
         }
-
         function copyText() { navigator.clipboard.writeText(document.getElementById('outputText').innerText); }
     </script>
 </body>
