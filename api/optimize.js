@@ -1,10 +1,17 @@
 export default async function handler(req, res) {
     if (req.method !== 'POST') return res.status(405).json({ message: 'Error' });
-
+    
     const { text, mode } = req.body;
-    const API_KEY = process.env.GEMINI_API_KEY;
+    
+    // INTENTO DE LECTURA FORZADA
+    const API_KEY = process.env.GEMINI_API_KEY || process.env.NEXT_PUBLIC_GEMINI_API_KEY;
 
-    if (!API_KEY) return res.status(500).json({ error: "Falta la API Key en Vercel." });
+    if (!API_KEY || API_KEY === "") {
+        return res.status(500).json({ 
+            error: "La llave sigue sin aparecer en el servidor.",
+            diagnostico: "Revisa que en Vercel el nombre sea GEMINI_API_KEY y esté en Production."
+        });
+    }
 
     const instructions = {
         directo: "Actúa como un mentor profesional. Reescribe este mensaje para que sea cálido y directo.",
@@ -23,9 +30,8 @@ export default async function handler(req, res) {
 
         const data = await response.json();
 
-        // Si Google devuelve un error (ej. API Key inválida), lo capturamos aquí
         if (data.error) {
-            return res.status(500).json({ error: `Google dice: ${data.error.message}` });
+            return res.status(500).json({ error: `Google Gemini dice: ${data.error.message}` });
         }
 
         if (data.candidates && data.candidates[0].content) {
@@ -33,7 +39,7 @@ export default async function handler(req, res) {
             return res.status(200).json({ humanizedText: humanizedText.trim() });
         }
         
-        return res.status(500).json({ error: "Gemini no pudo procesar este texto." });
+        return res.status(500).json({ error: "Gemini recibió la llave pero no pudo procesar el texto." });
 
     } catch (error) {
         return res.status(500).json({ error: "Fallo de conexión con el satélite neural." });
