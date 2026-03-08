@@ -11,24 +11,24 @@
         .btn-mode { background: #1e293b; border: 1px solid #334155; transition: 0.3s; }
         .btn-mode.active { background: #38bdf8; color: #000; border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
         
-        /* EL SATÉLITE LAGUNA LABS */
+        /* ANIMACIÓN DEL SATÉLITE PRO */
         @keyframes orbit {
             0% { transform: rotate(0deg) translateX(45px) rotate(0deg); }
             100% { transform: rotate(360deg) translateX(45px) rotate(-360deg); }
         }
-        .satellite-loader { display: none; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 15px #38bdf8; animation: orbit 1.5s linear infinite; }
-        .neural-center { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 25px; height: 25px; background: rgba(56, 189, 248, 0.1); border: 1px solid rgba(56, 189, 248, 0.3); border-radius: 50%; }
+        .satellite-loader { display: none; position: absolute; top: 50%; left: 50%; width: 10px; height: 10px; background: #38bdf8; border-radius: 50%; box-shadow: 0 0 15px #38bdf8; animation: orbit 1.5s linear infinite; z-index: 20; }
+        .neural-center { display: none; position: absolute; top: 50%; left: 50%; transform: translate(-50%, -50%); width: 20px; height: 20px; background: rgba(56, 189, 248, 0.2); border-radius: 50%; z-index: 10; filter: blur(4px); }
     </style>
 </head>
 <body class="min-h-screen flex items-center justify-center p-4 md:p-10">
 
     <div class="max-w-6xl w-full glass-panel p-6 md:p-10 shadow-2xl relative">
         
-        <div class="text-center mb-10">
+        <div class="text-center mb-8">
             <h1 class="text-3xl md:text-5xl font-black italic tracking-tighter mb-2 uppercase text-white">
                 UnRobotized <span class="text-sky-400">PRO</span>
             </h1>
-            <p class="text-[10px] md:text-xs uppercase tracking-[0.2em] font-bold text-slate-300">
+            <p class="text-[9px] md:text-xs uppercase tracking-[0.2em] font-bold text-slate-300">
                 TRANSFORMA MENSAJES FRÍOS EN APERTURAS DE ALTO VALOR
             </p>
         </div>
@@ -36,7 +36,7 @@
         <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
             
             <div class="space-y-6">
-                <div class="flex gap-3">
+                <div class="flex gap-2">
                     <button onclick="setMode('directo')" id="btn-directo" class="btn-mode active flex-1 py-4 rounded-xl flex flex-col items-center">
                         <span class="text-xl">↑</span>
                         <span class="text-[10px] font-black uppercase">Directo</span>
@@ -52,8 +52,7 @@
                 </div>
 
                 <div class="bg-slate-900/90 rounded-2xl border border-slate-700 p-6 h-64 md:h-72">
-                    <label class="text-[10px] uppercase tracking-widest text-sky-400 font-black mb-4 block">Entrada de Texto</label>
-                    <textarea id="inputText" class="w-full h-40 md:h-48 bg-transparent outline-none resize-none text-base md:text-lg text-slate-200" placeholder="Pega tu mensaje aquí..."></textarea>
+                    <textarea id="inputText" class="w-full h-full bg-transparent outline-none resize-none text-base md:text-lg text-slate-200" placeholder="Pega tu mensaje aquí..."></textarea>
                 </div>
 
                 <button onclick="checkAndExecute()" class="w-full py-5 bg-sky-500 text-white font-black rounded-2xl hover:bg-sky-400 transition-all uppercase tracking-[0.2em] shadow-lg text-sm">
@@ -74,11 +73,9 @@
                     <button onclick="copyText()" class="mt-4 bg-white text-black py-3 rounded-lg font-black text-[10px] uppercase hover:bg-sky-400 transition-all">Copiar Texto</button>
                 </div>
 
-                <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 opacity-70">
-                    <div class="flex justify-between items-center">
-                        <label class="text-[9px] uppercase tracking-widest text-slate-400 font-bold italic">Misiones Recientes</label>
-                        <span id="mission-count" class="text-[9px] font-black text-sky-400">3/3 DISPONIBLES</span>
-                    </div>
+                <div class="bg-slate-900/50 rounded-xl border border-slate-800 p-4 flex justify-between items-center">
+                    <span class="text-[9px] uppercase tracking-widest text-slate-400 font-bold italic">Misiones Recientes</span>
+                    <span id="mission-count" class="text-[9px] font-black text-sky-400">3/3 DISPONIBLES</span>
                 </div>
             </div>
         </div>
@@ -106,12 +103,12 @@
             // ACTIVAR SATÉLITE
             document.getElementById('sat-center').style.display = 'block';
             document.getElementById('sat-orb').style.display = 'block';
-            document.getElementById('outputText').innerText = "CALIBRANDO MISIL...";
+            document.getElementById('outputText').innerText = "CONECTANDO CON EL SATÉLITE...";
 
             try {
                 const res = await fetch('/api/optimize', {
                     method: 'POST',
-                    body: JSON.stringify({ text: text, mode: currentMode }),
+                    body: JSON.stringify({ text, mode: currentMode }),
                     headers: {'Content-Type': 'application/json'}
                 });
                 const result = await res.json();
