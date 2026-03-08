@@ -5,23 +5,24 @@ export default async function handler(req, res) {
         const { text, mode } = req.body;
         if (!text) return res.status(400).json({ error: 'Texto vacío' });
 
-        // MOTOR DE BREVEDAD LAGUNA LABS
-        // Reemplazamos términos "robóticos" por palabras cortas y humanas
+        // MOTOR HUMANO LAGUNA LABS - RECALIBRADO
         let processedText = text
-            .replace(/específicamente/gi, "más que nada")
+            // Elimina formalismos innecesarios
+            .replace(/en resumen/gi, "al final")
+            .replace(/por favor/gi, "mira,")
+            .replace(/es de mejor calidad/gi, "es mejor")
+            .replace(/no es la más indicada/gi, "no te ayuda")
+            .replace(/está matando tus ventas/gi, "te está arruinando las ventas")
+            // Limpieza de palabras "pesadas"
             .replace(/adicionalmente/gi, "además")
-            .replace(/proporcionar/gi, "darte")
-            .replace(/fundamental/gi, "clave")
-            .replace(/actualmente/gi, "ahora")
-            .replace(/con el fin de/gi, "para")
-            .replace(/implementar/gi, "lanzar")
-            .replace(/notificar/gi, "avisar");
+            .replace(/notificar/gi, "avisar")
+            .replace(/proporcionar/gi, "darte");
 
-        // Ajuste de estilo según el botón presionado
+        // Ajuste según el botón seleccionado
         if (mode === 'whatsapp') {
-            processedText = processedText.toLowerCase().replace(/\./g, ""); // Más informal
+            processedText = "Oye, " + processedText.toLowerCase().replace(/\./g, "") + " 👍";
         } else if (mode === 'curioso') {
-            processedText = "¿Has pensado que " + processedText.charAt(0).toLowerCase() + processedText.slice(1) + "?";
+            processedText = "¿No crees que " + processedText.charAt(0).toLowerCase() + processedText.slice(1) + "?";
         }
 
         return res.status(200).json({ 
