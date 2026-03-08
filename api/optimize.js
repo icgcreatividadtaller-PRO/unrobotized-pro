@@ -1,57 +1,41 @@
-import { Redis } from 'ioredis';
-import OpenAI from 'openai';
-
-// Inicialización de herramientas
-const openai = new OpenAI({ apiKey: process.env.OPENAI_API_KEY });
-const redis = new Redis(process.env.REDIS_URL); // Usa tu URL de una sola línea
-
 export default async function handler(req, res) {
-  if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
-
-  // 1. Identificación de la "matrícula" (IP)
-  const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-  const limit = 3;
-
-  try {
-    // 2. Consulta a la base de datos
-    const count = await redis.get(`usage:${ip}`) || 0;
-    const currentCount = parseInt(count);
-
-    // 3. Bloqueo táctico (Caja Registradora)
-    if (currentCount >= limit) {
-      return res.status(403).json({ 
-        error: "LIMIT_REACHED", 
-        message: "Acceso de cortesía completado." 
-      });
+    // Solo permitimos peticiones POST (seguridad)
+    if (req.method !== 'POST') {
+        return res.status(405).json({ message: 'Método no permitido' });
     }
 
-    const { message, tone } = req.body;
-    
-    // Prompts recalibrados: Cortos y Agresivos
-    const prompts = {
-      directo: "Eres un cerrador de ventas. Escribe un mensaje corto, agresivo y directo al grano. Máximo 200 caracteres.",
-      curioso: "Experto en psicología. Genera curiosidad extrema con una pregunta final potente.",
-      whatsapp: "Tono casual de WhatsApp. Usa minúsculas y 2 emojis (🚀, 🎯). Que parezca humano."
-    };
+    try {
+        const { text } = req.body;
 
-    const completion = await openai.chat.completions.create({
-      model: "gpt-4o-mini",
-      messages: [
-        { role: "system", content: prompts[tone] || prompts.directo },
-        { role: "user", content: `Humaniza este mensaje: "${message}"` }
-      ],
-      temperature: 0.8,
-    });
+        if (!text) {
+            return res.status(400).json({ error: 'No se recibió texto para procesar.' });
+        }
 
-    const optimizedResult = completion.choices[0].message.content;
+        // --- LÓGICA DE HUMANIZACIÓN DE LAGUNA LABS ---
+        // Aquí es donde sucede la magia. Por ahora usamos una lógica de reemplazo.
+        // En el futuro, aquí conectarás tu API Key de Gemini o OpenAI.
+        
+        let processedText = text
+            .replace(/específicamente/g, "sobre todo")
+            .replace(/adicionalmente/g, "además")
+            .replace(/con el fin de/g, "para")
+            .replace(/proporcionar/g, "dar")
+            .replace(/actualmente/g, "hoy por hoy")
+            .replace(/fundamental/g, "clave");
 
-    // 4. Registrar uso y darle 24h de validez
-    await redis.set(`usage:${ip}`, currentCount + 1, 'EX', 86400);
+        // Añadimos un toque de "imperfección humana" al azar
+        const humantouches = ["...", " la verdad es que", " por decirlo así,", " básicamente"];
+        processedText = processedText + humantouches[Math.floor(Math.random() * humantouches.length)];
 
-    return res.json({ optimized: optimizedResult });
+        // --- RESPUESTA FINAL ---
+        // Es vital que el campo se llame "humanizedText" para que el HTML lo lea bien
+        return res.status(200).json({ 
+            humanizedText: processedText,
+            version: "Laguna Labs Neural 4.0"
+        });
 
-  } catch (error) {
-    console.error("Error táctico:", error);
-    return res.status(500).json({ error: "SISTEMA: Error de enlace con el satélite." });
-  }
+    } catch (error) {
+        console.error("Error en el motor de optimización:", error);
+        return res.status(500).json({ error: "Error interno del motor." });
+    }
 }
