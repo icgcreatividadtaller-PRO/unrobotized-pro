@@ -3,56 +3,41 @@ export default async function handler(req, res) {
 
     try {
         const { text, mode } = req.body;
-        if (!text || text.length < 5) return res.status(400).json({ error: 'Texto insuficiente' });
+        if (!text) return res.status(400).json({ error: 'Vacío' });
 
-        let input = text.trim();
-        let sentences = input.split(/[.!?]+/); // Dividimos el mensaje en oraciones
-        let output = "";
+        // MOTOR DE CALIDEZ LAGUNA LABS (Restaurado)
+        let result = text
+            // Cambiamos Frialdad por Calidez Motivadora
+            .replace(/estimado cliente/gi, "¡Hola! Qué bueno saludarte")
+            .replace(/por medio de la presente/gi, "Te escribo porque")
+            .replace(/le escribo para/gi, "quiero contarte que")
+            .replace(/notificarle/gi, "darte una gran noticia")
+            .replace(/poseemos/gi, "tenemos para ti")
+            .replace(/específicamente/gi, "especialmente")
+            .replace(/proporcionar/gi, "darte")
+            .replace(/fundamental/gi, "clave")
+            .replace(/implementar/gi, "empezar con")
+            .replace(/actualmente/gi, "hoy mismo")
+            .replace(/determinar/gi, "asegurar")
+            .replace(/está matando/gi, "está frenando")
+            .replace(/de mejor calidad/gi, "de otro nivel")
+            .replace(/no es la más indicada/gi, "no es la que te mereces");
 
-        // 1. TRANSFORMADOR DE TONO (No depende de palabras específicas)
-        // Añadimos variabilidad en la apertura según el modo
-        const openers = {
-            directo: ["Mira, la cosa es que ", "Seamos claros: ", "La realidad es que "],
-            curioso: ["Me pregunto si ", "¿Has pensado que tal vez ", "¿No te parece que "],
-            whatsapp: ["Oye, ", "Escucha, ", "Te cuento: "]
-        };
+        // Ajuste por Modo (Sin añadir "paja" extra)
+        if (mode === 'whatsapp') {
+            result = "¡Oye! " + result.replace(/!/g, "") + " 🚀";
+        } else if (mode === 'curioso') {
+            result = "¿Sabías que " + result.charAt(0).toLowerCase() + result.slice(1) + "?";
+        } else {
+            // MODO DIRECTO: Mantiene la fuerza y calidez
+            if (!result.includes("¡")) result = "¡Mira! " + result;
+        }
 
-        const currentOpeners = openers[mode] || openers.directo;
-        output = currentOpeners[Math.floor(Math.random() * currentOpeners.length)];
-
-        // 2. PROCESADOR DE CUERPO (Limpieza de "Grasa Corporativa")
-        // Aquí mantenemos los reemplazos, pero solo como apoyo
-        let body = input;
-        const dictionary = {
-            "específicamente": "más que nada",
-            "adicionalmente": "además",
-            "proporcionar": "dar",
-            "en resumen": "al final",
-            "está matando": "te arruina"
-        };
-
-        Object.keys(dictionary).forEach(key => {
-            body = body.replace(new RegExp(key, "gi"), dictionary[key]);
+        return res.status(200).json({ 
+            humanizedText: result.trim() 
         });
 
-        // 3. REESTRUCTURACIÓN DINÁMICA
-        // Si el texto es largo, lo hacemos más directo (quitamos "paja")
-        if (body.length > 100) {
-            body = body.replace(/ que /g, " que, la verdad, ");
-        }
-
-        output += body.charAt(0).toLowerCase() + body.slice(1);
-
-        // 4. CIERRE HUMANO (Evita el "Efecto Espejo")
-        if (mode === 'whatsapp') {
-            output = output.toLowerCase().replace(/\./g, "") + "... dime qué te parece";
-        } else if (mode === 'curioso') {
-            output += " Piénsalo un poco, creo que tiene sentido.";
-        }
-
-        return res.status(200).json({ humanizedText: output.trim() });
-
     } catch (error) {
-        return res.status(500).json({ error: "Fallo en el núcleo" });
+        return res.status(500).json({ error: "Fallo" });
     }
 }
