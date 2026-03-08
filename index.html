@@ -1,144 +1,36 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>UnRobotized PRO | Laguna Labs</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        body { background-color: #050a18; color: #ffffff; font-family: 'Inter', sans-serif; overflow-x: hidden; }
-        .glass-panel { background: rgba(15, 23, 42, 0.6); backdrop-filter: blur(12px); border: 1px solid rgba(255, 255, 255, 0.1); border-radius: 2.5rem; }
-        .neon-blue { box-shadow: 0 0 30px rgba(56, 189, 248, 0.15); }
-        .btn-mode { background: #1e293b; border: 1px solid #334155; transition: all 0.3s; }
-        .btn-mode.active { background: #38bdf8; color: #000; border-color: #38bdf8; box-shadow: 0 0 20px rgba(56, 189, 248, 0.4); }
-        .hidden { display: none; }
-        #paywall { background: rgba(5, 10, 24, 0.99); backdrop-filter: blur(25px); }
-    </style>
-</head>
-<body class="min-h-screen flex items-center justify-center p-6">
+async function checkAndExecute() {
+    const text = document.getElementById('inputText').value;
+    if(!text) return;
 
-    <div class="max-w-7xl w-full glass-panel p-10 md:p-16 neon-blue relative">
-        
-        <div class="text-center mb-12">
-            <h1 class="text-6xl font-black italic tracking-tighter mb-4 text-white uppercase">UnRobotized <span class="text-sky-400">PRO</span></h1>
-            <p class="text-lg md:text-xl uppercase tracking-[0.1em] font-bold text-slate-200 mb-2">TRANSFORMA MENSAJES FRÍOS EN APERTURAS DE ALTO VALOR</p>
-            <p class="text-sm uppercase tracking-[0.4em] text-sky-400 font-black opacity-80">Neural Humanizer Engine</p>
-        </div>
+    try {
+        const response = await fetch('/api/check-limit');
+        const data = await response.json();
+        if (data.blocked || missionsLeft <= 0) { showPaywall(); return; }
+    } catch (e) { console.error("Error en el guardia"); }
 
-        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12">
-            
-            <div class="space-y-8">
-                <div class="flex gap-4">
-                    <button onclick="setMode('directo')" id="btn-directo" class="btn-mode active flex-1 py-6 rounded-2xl flex flex-col items-center gap-2">
-                        <span class="text-3xl">↑</span>
-                        <span class="text-sm font-black uppercase tracking-widest">Directo</span>
-                    </button>
-                    <button onclick="setMode('curioso')" id="btn-curioso" class="btn-mode flex-1 py-6 rounded-2xl flex flex-col items-center gap-2">
-                        <span class="text-3xl">?</span>
-                        <span class="text-sm font-black uppercase tracking-widest">Curioso</span>
-                    </button>
-                    <button onclick="setMode('whatsapp')" id="btn-whatsapp" class="btn-mode flex-1 py-6 rounded-2xl flex flex-col items-center gap-2">
-                        <span class="text-3xl">💬</span>
-                        <span class="text-sm font-black uppercase tracking-widest">WhatsApp</span>
-                    </button>
-                </div>
+    try {
+        const res = await fetch('/api/optimize', {
+            method: 'POST',
+            body: JSON.stringify({ text: text, mode: currentMode }),
+            headers: {'Content-Type': 'application/json'}
+        });
 
-                <div class="bg-slate-900/90 rounded-[2rem] border border-slate-700 p-8 h-80 relative">
-                    <label class="text-sm uppercase tracking-widest text-sky-400 font-black mb-6 block">Entrada de Texto</label>
-                    <textarea id="inputText" class="w-full h-52 bg-transparent outline-none resize-none text-xl text-slate-200 leading-relaxed" placeholder="Pega tu mensaje aquí..."></textarea>
-                </div>
-            </div>
+        const result = await res.json();
 
-            <div class="space-y-8 flex flex-col">
-                <div class="bg-slate-900/90 rounded-[2rem] border border-sky-500/30 p-8 min-h-[400px] flex flex-col">
-                    <label class="text-sm uppercase tracking-widest text-sky-400 font-black mb-6 block">Misil Generado</label>
-                    <div id="outputContainer" class="flex-1 flex items-start justify-center text-center italic text-slate-100">
-                        <p id="outputText" class="text-xl md:text-2xl leading-snug py-4">Listo para calibrar tu mensaje...</p>
-                    </div>
-                    <button onclick="copyText()" class="mt-6 bg-white text-black py-4 rounded-xl font-black text-sm uppercase hover:bg-sky-400 transition-all active:scale-95 shadow-lg">Copiar Texto</button>
-                </div>
-
-                <div class="bg-slate-900/50 rounded-2xl border border-slate-800 p-6">
-                    <div class="flex justify-between items-center mb-3">
-                        <label class="text-sm uppercase tracking-widest text-slate-400 font-bold">Misiones Recientes</label>
-                        <span id="mission-count" class="text-xs font-black text-sky-400 bg-sky-400/10 px-3 py-1 rounded">3/3 DISPONIBLES</span>
-                    </div>
-                    <div id="mission-log" class="space-y-2 text-xs font-medium max-h-20 overflow-hidden opacity-50">
-                        <div class="border-b border-white/5 pb-1 italic">Esperando primer lanzamiento...</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <button onclick="checkAndExecute()" class="w-full mt-10 py-7 bg-gradient-to-r from-blue-600 to-sky-400 text-white font-black rounded-[1.5rem] hover:scale-[1.01] active:scale-95 transition-all uppercase tracking-[0.3em] shadow-2xl shadow-blue-500/30 text-xl">
-            Optimizar con pulso humano
-        </button>
-
-        <footer class="mt-14 text-center">
-            <p class="text-xs tracking-[0.4em] opacity-40 font-bold uppercase">LAGUNA LABS - MCMXLIII. 2026</p>
-        </footer>
-    </div>
-
-    <div id="paywall" class="fixed inset-0 z-50 flex items-center justify-center p-6 hidden">
-        <div class="max-w-md w-full text-center p-14 glass-panel border-sky-400/50 shadow-[0_0_50px_rgba(56,189,248,0.2)]">
-            <h2 class="text-4xl font-black mb-6 italic text-white">MISIÓN AGOTADA</h2>
-            <p class="text-slate-400 mb-10 text-lg leading-relaxed">Has alcanzado el límite de 3 misiones gratuitas. Activa el acceso ilimitado para continuar.</p>
-            <a href="https://lagunalabs.gumroad.com/l/abfic" target="_blank" class="block w-full py-6 bg-sky-400 text-black font-black rounded-2xl uppercase tracking-widest shadow-xl">Desbloquear Ahora</a>
-        </div>
-    </div>
-
-    <script>
-        let currentMode = 'directo';
-        let missionsLeft = localStorage.getItem('unrobotized_misiones') || 3;
-        document.getElementById('mission-count').innerText = `${missionsLeft}/3 DISPONIBLES`;
-
-        function setMode(mode) {
-            currentMode = mode;
-            document.querySelectorAll('.btn-mode').forEach(b => b.classList.remove('active'));
-            document.getElementById(`btn-${mode}`).classList.add('active');
-        }
-
-        async function checkAndExecute() {
-            const text = document.getElementById('inputText').value;
-            if(!text) return;
-
-            try {
-                const response = await fetch('/api/check-limit');
-                const data = await response.json();
-                if (data.blocked || missionsLeft <= 0) { showPaywall(); return; }
-            } catch (e) {
-                if (missionsLeft <= 0) { showPaywall(); return; }
-            }
-
-            const res = await fetch('/api/optimize', {
-                method: 'POST',
-                body: JSON.stringify({ text: text, mode: currentMode }),
-                headers: {'Content-Type': 'application/json'}
-            });
-            const result = await res.json();
-
+        // VALIDACIÓN CRÍTICA: Si no hay texto, mostramos el error del servidor
+        if (result.humanizedText) {
             document.getElementById('outputText').innerText = result.humanizedText;
             
             missionsLeft--;
             localStorage.setItem('unrobotized_misiones', missionsLeft);
             document.getElementById('mission-count').innerText = `${missionsLeft}/3 DISPONIBLES`;
             addLogEntry(result.humanizedText);
+        } else {
+            // Si el servidor mandó un error, lo mostramos aquí
+            document.getElementById('outputText').innerText = "ERROR NEURAL: " + (result.error || "Fallo desconocido");
         }
 
-        function addLogEntry(txt) {
-            const log = document.getElementById('mission-log');
-            if(log.innerHTML.includes("Esperando")) log.innerHTML = "";
-            const entry = document.createElement('div');
-            entry.className = "text-sky-400/70 truncate border-b border-white/5 pb-1 italic";
-            entry.innerText = `> ${txt}`;
-            log.prepend(entry);
-        }
-
-        function showPaywall() { document.getElementById('paywall').classList.remove('hidden'); }
-        function copyText() {
-            const t = document.getElementById('outputText').innerText;
-            navigator.clipboard.writeText(t);
-        }
-    </script>
-</body>
-</html>
+    } catch (error) {
+        document.getElementById('outputText').innerText = "ERROR DE CONEXIÓN: Verifica tu API Key en Vercel.";
+    }
+}
