@@ -14,8 +14,8 @@ export default async function handler(req, res) {
     const prompt = `${instructions[mode] || instructions.directo}\n\nMENSAJE: "${text}"\n\nResponde SOLO con el nuevo texto humanizado.`;
 
     try {
-        // Usamos gemini-pro y la versión estable v1 para máxima seguridad
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-pro:generateContent?key=${API_KEY}`, {
+        // CAMBIO DEFINITIVO: Modelo gemini-1.5-flash en la versión v1
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1/models/gemini-1.5-flash:generateContent?key=${API_KEY}`, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
@@ -24,10 +24,15 @@ export default async function handler(req, res) {
         const data = await response.json();
         
         if (data.candidates && data.candidates[0].content) {
-            return res.status(200).json({ humanizedText: data.candidates[0].content.parts[0].text.trim() });
+            const resultText = data.candidates[0].content.parts[0].text.trim();
+            return res.status(200).json({ humanizedText: resultText });
         }
         
-        return res.status(500).json({ error: data.error ? data.error.message : "El satélite no pudo procesar el texto." });
+        // Captura de errores específicos de Google
+        return res.status(500).json({ 
+            error: data.error ? data.error.message : "El satélite no pudo procesar el texto.",
+            diagnostico: data
+        });
     } catch (e) {
         return res.status(500).json({ error: "Fallo de conexión con el satélite neural." });
     }
