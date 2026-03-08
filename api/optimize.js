@@ -1,41 +1,34 @@
 export default async function handler(req, res) {
-    // Solo permitimos peticiones POST (seguridad)
-    if (req.method !== 'POST') {
-        return res.status(405).json({ message: 'Método no permitido' });
-    }
+    if (req.method !== 'POST') return res.status(405).json({ message: 'Error de método' });
 
     try {
-        const { text } = req.body;
+        const { text, mode } = req.body;
+        if (!text) return res.status(400).json({ error: 'Texto vacío' });
 
-        if (!text) {
-            return res.status(400).json({ error: 'No se recibió texto para procesar.' });
+        // MOTOR DE BREVEDAD LAGUNA LABS
+        // Reemplazamos términos "robóticos" por palabras cortas y humanas
+        let processedText = text
+            .replace(/específicamente/gi, "más que nada")
+            .replace(/adicionalmente/gi, "además")
+            .replace(/proporcionar/gi, "darte")
+            .replace(/fundamental/gi, "clave")
+            .replace(/actualmente/gi, "ahora")
+            .replace(/con el fin de/gi, "para")
+            .replace(/implementar/gi, "lanzar")
+            .replace(/notificar/gi, "avisar");
+
+        // Ajuste de estilo según el botón presionado
+        if (mode === 'whatsapp') {
+            processedText = processedText.toLowerCase().replace(/\./g, ""); // Más informal
+        } else if (mode === 'curioso') {
+            processedText = "¿Has pensado que " + processedText.charAt(0).toLowerCase() + processedText.slice(1) + "?";
         }
 
-        // --- LÓGICA DE HUMANIZACIÓN DE LAGUNA LABS ---
-        // Aquí es donde sucede la magia. Por ahora usamos una lógica de reemplazo.
-        // En el futuro, aquí conectarás tu API Key de Gemini o OpenAI.
-        
-        let processedText = text
-            .replace(/específicamente/g, "sobre todo")
-            .replace(/adicionalmente/g, "además")
-            .replace(/con el fin de/g, "para")
-            .replace(/proporcionar/g, "dar")
-            .replace(/actualmente/g, "hoy por hoy")
-            .replace(/fundamental/g, "clave");
-
-        // Añadimos un toque de "imperfección humana" al azar
-        const humantouches = ["...", " la verdad es que", " por decirlo así,", " básicamente"];
-        processedText = processedText + humantouches[Math.floor(Math.random() * humantouches.length)];
-
-        // --- RESPUESTA FINAL ---
-        // Es vital que el campo se llame "humanizedText" para que el HTML lo lea bien
         return res.status(200).json({ 
-            humanizedText: processedText,
-            version: "Laguna Labs Neural 4.0"
+            humanizedText: processedText.trim() 
         });
 
     } catch (error) {
-        console.error("Error en el motor de optimización:", error);
-        return res.status(500).json({ error: "Error interno del motor." });
+        return res.status(500).json({ error: "Fallo en el motor" });
     }
 }
